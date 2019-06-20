@@ -33,10 +33,10 @@
 
 #### Solution Details and Scripts
 
-<p> Detailed description of the project provided in auto_label.ipynb
+- Detailed description of the project provided in auto_label.ipynb
 	- Notebook outputs keywords (prelim_keywords.csv) from preliminary topic modeling
 	- Manually mix and match keywords to create dictionary (dict.csv) with desired categories, with a list of keywords for each category 
-	- Notebook takes in dict.csv to proceed with the semi-supervised labeling </p>
+	- Notebook takes in dict.csv to proceed with the semi-supervised labeling
 
 ## Built With
 
