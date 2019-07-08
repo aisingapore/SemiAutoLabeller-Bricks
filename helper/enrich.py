@@ -13,6 +13,22 @@ from sklearn.metrics import f1_score
 from sklearn.model_selection import train_test_split
 
 class Enrich:
+	'''
+    Collection of methods used to enrich initial dictionary (handcrafted by mix and match) using information from corpus
+    
+    Args:
+        dictionary (dataframe): initial dictionary
+        genre (array): genres of interest 
+
+    Attributes:
+        genre (array): genres of interest 
+        dict1 (dictionary): initial dictionary as a dictionary instead of a dataframe
+        seed_topic_list (list): list of seed topics for seeded topic modeling from initial dictionary
+        vectorizer (sklearn object): CountVectorizer on pre-processed corpus
+        tf_dtm (array): term frequency document-term matrix 
+		vocab (array): array of feature names in document-term matrix
+		new_topic_keywords(list): additional new keywords that converged around seeded topics after seeded topic modeling		
+    '''
     def __init__ (self, dictionary, genre):
         self.genre = genre
         self.dict1 = {}
@@ -25,10 +41,19 @@ class Enrich:
         self.tf_dtm = None
         self.vocab = None
         
-        self.vdoc = None
         self.new_topic_keywords = None
 
     def get_dtm(self,corpus, min_df, max_df):
+        ''' Get tfidf document-term matrix from pre-processed corpus
+        
+        Args:
+            corpus (series): panda series containing documents in pre-processed corpus
+            min_df (int): parameter in CountVectorizer for minimum documents that keywords should appear in 
+			max_df (int): parameter in CountVectorizer for maximum documents that keywords should appear in 
+            
+        Returns:
+            dtm (array): tfidf document-term matrix
+        '''
         self.vectorizer = CountVectorizer(ngram_range=(1, 1), min_df =min_df, max_df = max_df)
         self.vectorizer.fit(corpus)
         self.tf_dtm = self.vectorizer.transform(corpus)
@@ -41,6 +66,15 @@ class Enrich:
         return dtm
     
     def get_baseline_score(self, movies, cutoff = 1):
+        ''' Get baseline performance metrics (precision,recall, F1) for keyword matching method
+        
+        Args:
+            movies (dataframe): pandas dataframe of pre-processed dataset
+            cutoff (int): threshold number of keywords for a movie to belong to a genre
+            
+        Returns:
+            base_yres_test (dataframe): Baseline performance metrics for each genre
+        '''
         indices = np.array(range(movies.shape[0]))
 
         # 20% hold-out for test data
@@ -71,6 +105,15 @@ class Enrich:
         return base_yres_test
     
     def get_full_cooccurence_matrix(self):
+        ''' Get full co-occurence(npmi) matrix showing pairwise npmi scores for every word in the corpus vocabulary
+        
+        Args:
+            None
+            
+        Returns:
+            npmi_full (dataframe): pandas dataframe for co-occurence(npmi) matrix 
+        '''	
+		
         #word-word cooccurence matrix
         X = self.tf_dtm
         X[X > 0] = 1 
@@ -96,6 +139,17 @@ class Enrich:
         return npmi_full
         
     def generate_virtual_doc(self, npmi_full, percentile = 70):
+		''' Generate virtual document for each seeded keywords
+        Documents contains keywords from corpus vocabulary that highly co-occured with seeded keywords.
+		Serve as a method to restrict the npmi matrix.
+		
+        Args:
+            npmi_full (array): full npmi matrix
+			percentile (int): cutoff threshold for keywords to be selected for virtual documents
+            
+        Returns:
+            vodc (list): list of virtual documents
+        '''	
         
         # Generation of virtual documents
         npmi_sel = npmi_full.copy(deep=True)
@@ -113,7 +167,17 @@ class Enrich:
         return vdoc        
         
     def get_restricted_npmi_vectors(self, vdoc, npmi_full, size = 300):
-        
+		''' Restrict npmi matrix by virtual document and perform dimension reduction  
+		
+        Args:
+			vdoc (list): list of virtual documents
+            npmi_full (array): full npmi matrix
+			size (int): final length for dimension reduction
+            
+        Returns:
+            npmi_embed (array): restricted npmi matrix
+			vdoc_vocab (array): keywords from virtual documents
+        '''        
         # Restrict npmi matrix
         vectorizer = CountVectorizer(ngram_range=(1, 1))
         vectorizer.fit(vdoc)
@@ -134,7 +198,15 @@ class Enrich:
         return npmi_embed, vdoc_vocab
     
     def customized_nmf(self, npmi_embed, vdoc_vocab):
-        
+		''' Non-negative matrix factorization (with customized H matrix) on restricted npmi matrix
+		
+        Args:
+            npmi_embed (array): restricted npmi matrix
+			vdoc_vocab (array): keywords from virtual documents
+            
+        Returns:
+            nmf (sklearn object): fitted nmf model
+        '''        
         n = len(self.dict1.keys())
         
         nmf = NMF(n_components=n, random_state =42, init='custom',alpha=1, l1_ratio=0.0)
@@ -156,7 +228,16 @@ class Enrich:
         return nmf
         
     def new_words(self, nmf, vdoc_vocab, n_words = 20):
-        
+		'''Get additional new words that converged around seeded keywords from nmf topic modeling
+		
+        Args:
+            nmf (sklearn object): fitted nmf model
+			vdoc_vocab (array): keywords from virtual documents
+			n_words (int): top number of words to consider from nmf model
+            
+        Returns:
+            new_words_df (dataframe): dataframe to check the additional new words found
+        '''  
         keywords = np.array(vdoc_vocab)
         self.new_topic_keywords = []
         for topic_weights in nmf.components_:
@@ -170,6 +251,19 @@ class Enrich:
         return new_words_df
     
     def pruning(self, npmi_full, vdoc_vocab, cutoff = 1):
+		'''Prune keywords from enriched dictionary that highly occured with keywords in other topics
+		
+        Args:
+            npmi_full (array): full npmi matrix
+			vdoc_vocab (array): keywords from virtual documents
+			cutoff (float): npmi threshold for pruning. Set cutoff = 1 if no pruning required.
+            
+        Returns:
+            dict2_sel (dictionary): enriched dictionary as a dictionary for downstream processing
+			dict2_list_idx (list): list of vocabulary index for keywords in each genre
+			enriched_dict: (dataframe): enriched dictionary as a dataframe for output and checking 
+        ''' 	
+	
         # Remove dictionary words that highly co-occured in other topics
         dict2 = {self.genre[i]:list(set(list(self.dict1[self.genre[i]]) + list(self.new_topic_keywords[i]))) for i in range(len(self.genre))}
         dict2_sel = {}
@@ -192,26 +286,7 @@ class Enrich:
         enriched_dict = pd.DataFrame([dict2_sel[self.genre[i]] for i in range(len(self.genre))],index=self.genre).T
                 
         return dict2_sel, dict2_list_idx, enriched_dict
-    
-#     def temp(self, movies, dict2_sel, dict2_list_idx):
-#         # Keyword matching baseline
-#         n = len(self.genre)
-        
-#         doc_topic = pd.DataFrame(np.zeros((self.tf_dtm.shape[0],n)),columns= self.genre)
-#         for i in range(n):
-#             keywords_all_doc = self.tf_dtm[:,dict2_list_idx[i]].toarray()
-#             keywords_all_doc[keywords_all_doc > 0] = 1
-#             doc_topic.iloc[:,i] = keywords_all_doc.sum(axis=1)
 
-#         cutoff = 1
-
-#         ypred= (doc_topic>=cutoff).astype(int)
-
-#         ytrue = movies.iloc[:,1:]
-
-#         print('Precision: ',round(precision_score(ytrue, ypred,average='macro'),4)) 
-#         print('Recall: ',round(recall_score(ytrue, ypred,average='macro'),4))
-#         print('F1-score: ',round(f1_score(ytrue, ypred,average='macro'),4))
 
 
     

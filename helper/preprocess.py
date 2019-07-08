@@ -11,15 +11,27 @@ wnl = nltk.stem.WordNetLemmatizer()
 from contractions import CONTRACTION_MAP
 
 class Preprocess:
+	'''
+    Collection of methods used for text preprocessing of a document
+    
+    Args:
+        text (string): document of interest
+
+    Attributes:
+        text (string): document of interest
+    '''		
+
     def __init__ (self, text):
         self.text = text
 
     def tokenize_text(self):
-        '''
-        Tokenize Text
+        '''Tokenize Text
 
-        Inputs: string
-        Outputs: list of tokens 
+        Args: 
+			None
+			
+        Returns:
+            tokens (list): list of tokens for document of interest
         '''
         
         tokens = nltk.word_tokenize(self.text) 
@@ -27,15 +39,25 @@ class Preprocess:
         return tokens
     
     def return_text(self):
-        '''
-        Return text as string
+        '''Return text as string
+
+        Args: 
+			None
+			
+        Returns:
+            text (string): processed document of interest
         '''
         
         return self.text
     
     def expand_match(self, contraction):
-        '''
-        Helper function for expand_contraction
+        '''Helper function for expand_contractions
+		
+		Args: 
+			contraction(dictionary): contraction mapping
+			
+        Returns:
+            expanded_contraction (string): expanded contraction e.g. it's -> it is
         '''
         
         match = contraction.group(0)
@@ -46,12 +68,12 @@ class Preprocess:
         return expanded_contraction
 
     def expand_contractions(self):
-        '''
-        Expand contractions e.g. it's -> it is
-        Requires contractions.py file for mapping
-        
-        Inputs: string
-        Outputs: string
+        '''Expand contractions e.g. it's -> it is from contraction mapping in contraction.py
+ 		Args: 
+			None
+			
+        Returns:
+            None
         '''
         
         contractions_pattern = re.compile('({})'.format('|'.join(CONTRACTION_MAP.keys())), flags=re.IGNORECASE|re.DOTALL)            
@@ -61,11 +83,12 @@ class Preprocess:
         self.text = expanded_text
 
     def remove_special_characters(self):
-        '''
-        Remove special characters such as punctuations
-        
-        Inputs: string
-        Outputs: string
+        '''Remove special characters such as punctuations
+ 		Args: 
+			None
+			
+        Returns:
+            None
         '''
         
         tokens = self.tokenize_text()
@@ -76,12 +99,12 @@ class Preprocess:
         self.text = filtered_text
 
     def remove_stopwords(self):
-        '''
-        Remove stopswords using nltk stopwords list and custom stopwords list
-        Requires custom stopwords list in stopwords.csv file
-        
-        Inputs: string
-        Outputs: string
+        '''Remove stopswords using nltk stopwords list and custom stopwords list in stopwords.csv file
+ 		Args: 
+			None
+			
+        Returns:
+            None
         '''
         
         stopword_list = nltk.corpus.stopwords.words('english') 
@@ -94,11 +117,12 @@ class Preprocess:
         self.text = filtered_text
 
     def remove_digits(self):
-        '''
-        Remove digits
-        
-        Inputs: string
-        Outputs: string
+        '''Remove digits
+ 		Args: 
+			None
+			
+        Returns:
+            None
         '''
         
         tokens = self.tokenize_text()
@@ -108,11 +132,12 @@ class Preprocess:
         self.text = filtered_text    
     
     def filter_out_PERSON_named_entity(self):
-        '''
-        Filters out person's name from text
-        
-        Inputs: string
-        Outputs: string
+        '''Filters out person's name from text
+ 		Args: 
+			None
+			
+        Returns:
+            None
         '''        
         
         tokens = self.tokenize_text()
@@ -125,8 +150,12 @@ class Preprocess:
         self.text = filtered_text
 
     def wn_tags(self, token_pos):
-        '''
-        Helper function for pos_tag_text
+        '''Helper function for pos_tag_text
+ 		Args: 
+			token_pos (string): part-of-speech tag 
+			
+        Returns:
+            wordnet pos tag (string): part-of-speech tag for wordnet
         '''
         
         if token_pos == 'ADJ': return wn.ADJ
@@ -136,11 +165,12 @@ class Preprocess:
         else: return None
 
     def pos_tag_text(self):
-        '''
-        For part-of-speech tagging
-        
-        Inputs: string
-        Outputs: list of tuples (word, pos-tag)
+        '''For part-of-speech tagging
+ 		Args: 
+			token_pos (string): part-of-speech tag 
+			
+        Returns:
+            tagged_text (tuple): tuple with (token, wordnet pos tag)
         '''
         
         tokens = self.tokenize_text()
@@ -150,11 +180,12 @@ class Preprocess:
         return tagged_text
 
     def lemmatize_text(self):
-        '''
-        Lemmatize text using nltk wordnet lemmatizer. More accurate lemmatization with pos-tags.
-        
-        Inputs: string
-        Outputs: string
+        '''Lemmatize text using nltk wordnet lemmatizer. More accurate lemmatization with pos-tags.
+ 		Args: 
+			None
+			
+        Returns:
+            None
         '''
 
         pos_tagged_text = self.pos_tag_text()
@@ -164,8 +195,12 @@ class Preprocess:
         self.text = lemmatized_text
     
     def keep_pos(self,keep_list =['n','v','a','r']):
-        '''
-        Only keep words with specified pos-tags especially for 
+        '''Only keep words with specified pos-tags especially for topic modeling
+ 		Args: 
+			keeplist (list): list of pos_tag to keep
+			
+        Returns:
+            None
         '''
         keep_tokens = [word for word,pos in self.pos_tag_text() if (pos in keep_list or pos is None)]
         keep_text = ' '.join([token for token in keep_tokens if token !=''])
@@ -173,8 +208,13 @@ class Preprocess:
         self.text = keep_text   
         
     def replace(self, word, pos=None):
-        '''
-        Helper function for replace_negation
+        '''Helper function for replace_negations
+ 		Args: 
+			word (string): negation word
+			pos (string): pos tag
+			
+        Returns:
+            antonyms (string): antonym of negation word 		
         '''
         antonyms = set()
         for syn in wn.synsets(word, pos=pos):
@@ -185,8 +225,12 @@ class Preprocess:
         else: return None
 
     def replace_negations(self, tokens):
-        '''
-        Helper function for replace negation
+        '''Helper function for replace negation
+ 		Args: 
+			tokens (string): word tokens
+			
+        Returns:
+            words (string): replace negation with antonym e.g. 'not happy' -> 'sad'		
         '''
         i, l = 0, len(tokens)
         words = []
@@ -204,11 +248,12 @@ class Preprocess:
         return words
 
     def replace_negation(self):
-        '''
-        Replace negation e.g. not happy -> sad
-        
-        Inputs: string
-        Outputs: string
+        '''Replace negation e.g. not happy -> sad
+ 		Args: 
+			None
+			
+        Returns:
+            None
         '''
                 
         tokens = self.tokenize_text()
@@ -218,6 +263,14 @@ class Preprocess:
         self.text = replaced_text
         
 def replace_bigrams(text,bigrams):
+        '''Combine frequently occured bigrams into one word using an '_' eg. 'opening hours' -> 'opening_hours'
+ 		Args: 
+			text (string): document of interest
+			bigrams (list): list of frequently occured bigrams identified by tfidf vectorizer
+			
+        Returns:
+            replaced_text (string): document with frequently occured bigrams combined into one word
+        '''
     
     def tokenize_text(text): 
         tokens = nltk.word_tokenize(text) 

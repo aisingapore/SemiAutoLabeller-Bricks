@@ -12,6 +12,22 @@ from sklearn.metrics import recall_score
 from sklearn.metrics import f1_score
 
 class Supervised:
+	'''
+    Get performane metrics of supervised benchmarks
+    
+    Args:
+        test_idx (array): index for test documents
+        genre (array): genres of interest 
+
+    Attributes:
+        test_idx (array): index for test documents
+		genre (array): genres of interest 
+        df_trn (dataframe): train set
+        df_val (dataframe): validation set
+        dtm (array): tfidf document-term matrix for train set 
+		dtm_val (array): tfidf document-term matrix for validation set
+    '''	
+
     def __init__ (self, test_idx, genre):
         self.test_idx = test_idx
         self.genre = genre
@@ -22,6 +38,18 @@ class Supervised:
         self.dtm_val = None
         
     def get_dtm(self, movies, train_idx0, min_df, max_df):
+        ''' Get tfidf document-term matrix for train and validation set
+        
+        Args:
+            movies (dataframe): pandas dataframe of pre-processed dataset
+			train_idx0 (array): index for full train set, 10% of these will be used to train classifier
+            min_df (int): parameter in CountVectorizer for minimum documents that keywords should appear in 
+			max_df (int): parameter in CountVectorizer for maximum documents that keywords should appear in 
+            
+        Returns:
+            None
+        '''
+	
         np.random.seed(1)
         train_idx = np.random.choice(train_idx0,int(0.1*movies.shape[0]),replace=False)
 
@@ -44,6 +72,14 @@ class Supervised:
         self.dtm_val = transformer.fit_transform(tf_dtm_val)
               
     def classifier(self, classifier):
+        ''' Get performane metrics of supervised benchmark using a particular classification model
+        
+        Args:
+            classifier (sklearn classifier): classifer to be used as supervised benchmark
+            
+        Returns:
+            yres_test (dataframe): Performance metrics for each genre 
+        '''
     
         ypred_val_proba = np.zeros((self.dtm_val.shape[0],len(self.genre)))
 
