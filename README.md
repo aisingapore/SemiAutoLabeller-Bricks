@@ -29,7 +29,12 @@
 
 <pre><code>pip install -r requirements.txt</code></pre>
 
-2. Download movies21500.csv from https://drive.google.com/file/d/1U_Y3z1mecNtuiabUHA_TpryExVNtSbmH/view?usp=sharing and put it in this repository folder
+2. For first time users of ntlk, run the following code to install NLTK corpus:
+
+<pre><code>import nltk   
+nltk.download('all')</code></pre>    
+
+3. Download movies21500.csv from https://drive.google.com/file/d/1U_Y3z1mecNtuiabUHA_TpryExVNtSbmH/view?usp=sharing and put it in this repository folder
 
 #### Solution Details and Scripts
 
