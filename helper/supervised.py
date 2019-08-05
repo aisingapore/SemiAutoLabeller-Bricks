@@ -12,7 +12,7 @@ from sklearn.metrics import recall_score
 from sklearn.metrics import f1_score
 
 class Supervised:
-	'''
+    '''
     Get performane metrics of supervised benchmarks
     
     Args:
@@ -21,12 +21,12 @@ class Supervised:
 
     Attributes:
         test_idx (array): index for test documents
-		genre (array): genres of interest 
+        genre (array): genres of interest 
         df_trn (dataframe): train set
         df_val (dataframe): validation set
         dtm (array): tfidf document-term matrix for train set 
-		dtm_val (array): tfidf document-term matrix for validation set
-    '''	
+        dtm_val (array): tfidf document-term matrix for validation set
+    '''
 
     def __init__ (self, test_idx, genre):
         self.test_idx = test_idx
@@ -42,14 +42,14 @@ class Supervised:
         
         Args:
             movies (dataframe): pandas dataframe of pre-processed dataset
-			train_idx0 (array): index for full train set, 10% of these will be used to train classifier
+            train_idx0 (array): index for full train set, 10% of these will be used to train classifier
             min_df (int): parameter in CountVectorizer for minimum documents that keywords should appear in 
-			max_df (int): parameter in CountVectorizer for maximum documents that keywords should appear in 
+            max_df (int): parameter in CountVectorizer for maximum documents that keywords should appear in 
             
         Returns:
             None
         '''
-	
+        
         np.random.seed(1)
         train_idx = np.random.choice(train_idx0,int(0.1*movies.shape[0]),replace=False)
 

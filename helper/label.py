@@ -9,7 +9,7 @@ from sklearn.decomposition import NMF
 from sklearn.naive_bayes import MultinomialNB
 
 class Label:
-	'''
+    '''
     Collection of methods used to automatically label unlabeled documents based on enriched dictionary
     
     Args:
@@ -21,8 +21,8 @@ class Label:
         dict2_sel (dictionary): enriched dictionary 
         vectorizer (sklearn object): CountVectorizer on pre-processed corpus
         tf_dtm (array): term frequency document-term matrix 
-		vocab (array): array of feature names in document-term matrix
-    '''	
+        vocab (array): array of feature names in document-term matrix
+    '''
 
     def __init__ (self, dictionary, genre):
         self.genre = genre
@@ -38,7 +38,7 @@ class Label:
         Args:
             corpus (series): panda series containing documents in pre-processed corpus
             min_df (int): parameter in CountVectorizer for minimum documents that keywords should appear in 
-			max_df (int): parameter in CountVectorizer for maximum documents that keywords should appear in 
+            max_df (int): parameter in CountVectorizer for maximum documents that keywords should appear in 
             
         Returns:
             dtm (array): tfidf document-term matrix
@@ -55,13 +55,13 @@ class Label:
         return dtm
               
     def generate_virtual_doc(self, npmi_full, percentile = 50):
-		''' Generate virtual document for each seeded keywords
+        ''' Generate virtual document for each seeded keywords
         Documents contains keywords from corpus vocabulary that highly co-occured with seeded keywords.
-		Serve as a method to restrict the npmi matrix.
-		
+        Serve as a method to restrict the npmi matrix.
+
         Args:
             npmi_full (array): full npmi matrix
-			percentile (int): cutoff threshold for keywords to be selected for virtual documents
+            percentile (int): cutoff threshold for keywords to be selected for virtual documents
             
         Returns:
             vodc (list): list of virtual documents
@@ -80,16 +80,16 @@ class Label:
         return vdoc
         
     def get_restricted_npmi_vectors(self, vdoc, npmi_full, size = 1024):
-		''' Restrict npmi matrix by virtual document and perform dimension reduction  
-		
+        ''' Restrict npmi matrix by virtual document and perform dimension reduction  
+
         Args:
-			vdoc (list): list of virtual documents
+            vdoc (list): list of virtual documents
             npmi_full (array): full npmi matrix
-			size (int): final length for dimension reduction
+            size (int): final length for dimension reduction
             
         Returns:
             npmi_embed (array): restricted npmi matrix
-			vdoc_vocab (array): keywords from virtual documents
+            vdoc_vocab (array): keywords from virtual documents
         '''
         
         # Restrict npmi matrix
@@ -113,11 +113,11 @@ class Label:
         return npmi_embed, vdoc_vocab
         
     def compute_doc_vectors(self, npmi_embed, vdoc_vocab):
-		''' Compute document vectors from npmi matrix  
-		
+        ''' Compute document vectors from npmi matrix  
+
         Args:
             npmi_embed (array): restricted npmi matrix
-			vdoc_vocab (array): keywords from virtual documents
+            vdoc_vocab (array): keywords from virtual documents
             
         Returns:
             doc_npmi_embed (array): document vectors concatenated as a matrix
@@ -134,11 +134,11 @@ class Label:
         return doc_npmi_embed
     
     def seed_doc(self,dict2_list_idx, top = 10):
-		''' Get seeded documents that contained the most number of keywords from enriched dictionary
-		
+        ''' Get seeded documents that contained the most number of keywords from enriched dictionary
+
         Args:
-			dict2_list_idx (list): list of vocabulary index for keywords in each genre
-			top (int): top number of documents with most number of keywords from enriched dictionary to be used as seeded documents
+            dict2_list_idx (list): list of vocabulary index for keywords in each genre
+            top (int): top number of documents with most number of keywords from enriched dictionary to be used as seeded documents
             
         Returns:
             doc_seed_idx (list): index of seeded documents
@@ -159,8 +159,8 @@ class Label:
         return doc_seed_idx
     
     def customized_nmf(self, doc_npmi_embed, doc_seed_idx):
-		''' Non-negative matrix factorization (with customized H matrix) on restricted npmi matrix
-		
+        ''' Non-negative matrix factorization (with customized H matrix) on restricted npmi matrix
+
         Args:
             npmi_embed (array): restricted npmi matrix
             doc_seed_idx (list): index of seeded documents
@@ -189,20 +189,21 @@ class Label:
         return nmf
         
     def auto_label_classifier(self, nmf, movies, classifier, m = 1, min_df = 3, max_df = 300):
-		''' Automatically label unlabeled documents by predicting the labels based on documents that most/least likely belong to a category
-		Documents that most/least likely belong to a category were identified based on nmf topic scores
-		
+        ''' Automatically label unlabeled documents by predicting the labels based on documents that most/least likely belong to a category
+        Documents that most/least likely belong to a category were identified based on nmf topic scores
+
         Args:
             nmf (sklearn object): fitted nmf model
             movies (dataframe): pandas dataframe of pre-processed dataset
-			classifier (sklearn classifier): classifer to be trained for prediction
-			m (float): for setting threshold to identify documents that most/least likely belong to a category based on nmf topic scores
-			min_df (int): parameter in CountVectorizer for minimum documents that keywords should appear in 
-			max_df (int): parameter in CountVectorizer for maximum documents that keywords should appear in 
+            classifier (sklearn classifier): classifer to be trained for prediction
+            m (float): for setting threshold to identify documents that most/least likely belong to a category based on nmf topic scores
+            min_df (int): parameter in CountVectorizer for minimum documents that keywords should appear in 
+            max_df (int): parameter in CountVectorizer for maximum documents that keywords should appear in 
             
         Returns:
             ypred (dataframe): predicted labels for each document for each genre
-        '''  	
+        ''' 
+        
         ypred = pd.DataFrame(np.zeros(np.transpose(nmf.components_).shape),columns = self.genre)
 
         for i in range(len(self.genre)):
