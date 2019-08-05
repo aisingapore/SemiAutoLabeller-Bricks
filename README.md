@@ -29,7 +29,7 @@
 
 <pre><code>pip install -r requirements.txt</code></pre>
 
-2. For first time users of ntlk, run the following code to install NLTK corpus:
+2. For first time users of ntlk, run the following code to install nltk corpus:
 
 <pre><code>import nltk   
 nltk.download('all')</code></pre>    
