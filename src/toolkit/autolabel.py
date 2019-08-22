@@ -8,37 +8,74 @@ from src.helper.label import Label
 from src.helper.supervised import Supervised
 
 
-def corpus_replace_bigrams(min_df, max_df, corpus):
-    vectorizer = TfidfVectorizer(ngram_range=(1, 2), min_df=min_df, max_df=max_df)
-    vectorizer.fit(corpus)
-    bigrams = [word for word in vectorizer.get_feature_names() if len(word.split(' '))==2]
-    corpus_replaced = [replace_bigrams(text,bigrams) for text in corpus]
-    return corpus_replaced
+class Preprocessor():
+    """ Preprocessor holds methods to preprocess text data for auto labeller
+    """
+    def __init__(self):
+        return
+
+    def corpus_replace_bigrams(self, corpus, min_df, max_df):
+        """ replace words within corpus that frequently occur together with a singular representation
+        e.g. world war -> world_war
+        
+        Arguments:
+            min_df {DataFrame} -- ???
+            max_df {DataFrame} -- ???
+            corpus {Series} -- Text data to be clustered
+        
+        Returns:
+            List -- corpus that has its frequent bigrams replaced with a singular representation
+        """
+        vectorizer = TfidfVectorizer(ngram_range=(1, 2), min_df=min_df, max_df=max_df)
+        vectorizer.fit(corpus)
+        bigrams = [word for word in vectorizer.get_feature_names() if len(word.split(' '))==2]
+        corpus_replaced = [replace_bigrams(text,bigrams) for text in corpus]
+        return corpus_replaced
 
 
-def preprocess(text, stopwords_path):
-    preprocesser = Preprocess(text)
+    def _preprocess(self, text, stopwords_path):
+        """ function to preprocess text by performing transformations on the text
+        
+        Arguments:
+            text {String} -- a singular string of text for the preprocessor to work on
+            stopwords_path {String} -- path to a dictionary of stopwords
+        
+        Returns:
+            ??? -- preprocessed string
+        """
+        preprocesser = Preprocess(text)
 
-    preprocesser.expand_contractions()        
-    preprocesser.filter_out_PERSON_named_entity()
-    preprocesser.lemmatize_text()           
-    preprocesser.replace_negation()
+        preprocesser.expand_contractions()        
+        preprocesser.filter_out_PERSON_named_entity()
+        preprocesser.lemmatize_text()           
+        preprocesser.replace_negation()
 
-    preprocesser.remove_special_characters()
-    preprocesser.remove_digits()
-    preprocesser.remove_stopwords(stopwords_path)
+        preprocesser.remove_special_characters()
+        preprocesser.remove_digits()
+        preprocesser.remove_stopwords(stopwords_path)
 
-    preprocesser.keep_pos(keep_list =['n','v','a'])
-    
-    return preprocesser.return_text()
+        preprocesser.keep_pos(keep_list =['n','v','a'])
+        
+        return preprocesser.return_text()
 
 
-def corpus_preprocess(corpus, stopwords_path):
-    preprocessed_text = [preprocess(text, stopwords_path) for text in corpus]
-    return preprocessed_text
+    def corpus_preprocess(self, corpus, stopwords_path):
+        """ Preprocesses the entire corpus dataset
+        
+        Arguments:
+            corpus {List} -- A list of text to be labelled
+            stopwords_path {String} -- path to a dictionary of stopwords
+        
+        Returns:
+            List -- A list of preprocessed text to be labelled
+        """
+        preprocessed_text = [self._preprocess(text, stopwords_path) for text in corpus]
+        return preprocessed_text
 
 
 class AutoLabeller():
+    """ Contains methods to train and get labels for dataset
+    """
     def __init__(self, labels, corpus, data):
         self._labels = labels
         self._corpus = corpus
@@ -105,3 +142,24 @@ class AutoLabeller():
         ypred = label.auto_label_classifier(nmf, self._data, model, m=0.5, min_df=3, max_df=300)
 
         return ypred
+
+
+def recommend_words(corpus, topic_num=[7,8,9,10,11,12,13,14,15,16,17,18], min_df=3, max_df=300):
+    """ recommend words is the method used in the first round of recommendation for a list of words to
+    consider to be labelled
+    topic_num is the range of numbers to test
+
+    Returns:
+        tuple -- contains the topic_model, document term matrix and best number of topics to cluster
+    """
+    topic_model = Topic_model()
+
+    dtm = topic_model.get_dtm(corpus, min_df, max_df)
+
+    # get list of coherence scores of topic numbers
+    score_list = topic_model.get_nmf_coherence_score(dtm, topic_num)
+
+    # get the best number of topics
+    best_n = topic_num[score_list.index(max(score_list))] 
+    
+    return topic_model, dtm, best_n
