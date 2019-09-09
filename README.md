@@ -55,6 +55,12 @@ pip install -r requirements.txt
 jupyter notebook
 ```
 
+6. Run the following code within Jupyter to install nltk
+```
+import nltk   
+nltk.download('all')
+```
+
 ### Notebook Instruction
 1. Walk through the demo in bricks_demo_auto_label.ipynb to gain an intuition of the steps required for auto labelling.
 2. Walk through the sample notebook in bricks_auto_label.ipynb. This notebook allows you to experiment with the labelling tool and evaluate its usefulness for your company.
