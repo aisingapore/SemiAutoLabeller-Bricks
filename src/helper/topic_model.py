@@ -107,7 +107,7 @@ class Topic_model:
 
         # Topic - Keywords Dataframe
         df_topic_keywords = pd.DataFrame(topic_keywords)
-        df_topic_keywords.to_csv('prelim_keywords.csv',index=False, header=True)
+        # df_topic_keywords.to_csv('prelim_keywords.csv',index=False, header=True)
         
         return df_topic_keywords
             

@@ -3,7 +3,7 @@
 ## Introduction
 
 ### Background
-In businesses, it can be useful to label text data for identification, sorting or strategic purposes. Traditionally, businesses will employ word matching (building a label dictionary from scratch) or manual labour to put labels on their existing storage. However, this tends to be resource heavy and cumbersome to implement.
+It can be useful for businesses to label text data for identification, sorting or strategic purposes. Traditionally, businesses employ word matching (building a label dictionary from scratch) or manual labour to put labels on their existing storage. However, this tends to be resource heavy and can be cumbersome to implement.
 
 This project aims to ease this process and make labelling easy. With this \[semi\] auto labelling tool, users simply have to pick from a list of recommended words to form their label dictionary and allow the model to form an enriched dictionary. The model will then utilise the enriched dictionary to label the input text dataset.
 
@@ -62,7 +62,7 @@ nltk.download('all')
 ```
 
 ### Notebook Instruction
-1. Walk through the demo in bricks_demo_auto_label.ipynb to gain an intuition of the steps required for auto labelling.
+1. Walk through the demo in bricks_demo_auto_label.ipynb to gain an intuition of the steps required to operate this auto labelling tool.
 2. Walk through the sample notebook in bricks_auto_label.ipynb. This notebook allows you to experiment with the labelling tool and evaluate its usefulness for your company.
 
 ## Technical Documentation
@@ -73,7 +73,7 @@ nltk.download('all')
 
 ### Labels Dictionary
 It is important to identify your desired *keys* and *labels*
-* Manually mix and match keywords to create dictionary `labels.csv` with desired categories, with a list of keywords for each category 
+* Manually mix and match keywords to create the dictionary `labels.csv` with desired categories, with a list of keywords for each category 
 * Notebook takes in `data/labels.csv` to proceed with the semi-supervised labeling
 
 
@@ -87,12 +87,13 @@ Code tested with python 3.5.5 running on Azure Data Science Virtual Machine (Ubu
 <p>Lin Laiyi, Senior AI Apprentice at AI Singapore, NUS MSBA 2017/2018</p>
 <p>LinkedIn: https://www.linkedin.com/in/laiyilin/</p>
 <p>Portfolio of selected analytics project: https://drive.google.com/file/d/1fVntFEvj6us_6ERzRmbU85EOeZymFxEm/view</p>
-
-### Additional Notes
-<p> Editted by Jway Jin Jun on Aug 2019, AI Engineer at AI Singapore. </p>
-<p> Project is editted for the purpose of the Bricks project to demonstrate and enable AI Technologies </p>
-<p> Find the original project [here](https://github.com/lylin17/auto_label) </p>
+<p> Edited by Jway Jin Jun on Aug 2019, AI Engineer at AI Singapore. </p>
 <p> Find the original presentation slide [here](https://docs.google.com/presentation/u/1/d/1hQED4ZZqzcwgq6-jgtw3MbRWRPN6CRTOs_zbVQQu_YU/edit#slide=id.p) </p>
 
-## License
-***
+### Additional Notes
+
+<p> Project is editted for the purpose of the Bricks project to demonstrate and enable AI Technologies </p>
+<p> Find the original project [here](https://github.com/lylin17/auto_label) </p>
+
+
+### Software License
