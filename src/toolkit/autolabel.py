@@ -124,7 +124,7 @@ class AutoLabeller():
 
         return enriched_labels
 
-    def apply(self, model, top=10):
+    def apply(self, model, col_name, top=10):
 
         # Initialize label class
         label = Label(self._dict2_sel, self._genre)
@@ -150,7 +150,7 @@ class AutoLabeller():
 
         # "label" documents with very high and very low topic score and classify remaining unlabeled documents (higher uncertainty) using a naive bayes model
         ypred = label.auto_label_classifier(
-            nmf, self._data, model, m=0.5, min_df=3, max_df=300)
+            nmf, self._data, col_name, model, m=0.5, min_df=3, max_df=300)
 
         return ypred
 

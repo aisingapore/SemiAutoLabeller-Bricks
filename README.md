@@ -97,3 +97,9 @@ Code tested with python 3.5.5 running on Azure Data Science Virtual Machine (Ubu
 
 
 ### Software License
+
+
+### Dataset sources
+* news - [github](https://github.com/robsalgado/personal_data_science_projects/tree/master/mulitclass_text_class), [medium](https://medium.com/@robert.salgado/multiclass-text-classification-from-start-to-finish-f616a8642538)
+* toxic comments - [kaggle](https://www.kaggle.com/c/jigsaw-toxic-comment-classification-challenge/data)
+*

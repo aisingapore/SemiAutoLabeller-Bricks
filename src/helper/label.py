@@ -32,7 +32,7 @@ class Label:
         self.tf_dtm = None
         self.vocab = None
         
-    def get_dtm(self,corpus, min_df, max_df):
+    def get_dtm(self, corpus, min_df, max_df):
         ''' Get tfidf document-term matrix from pre-processed corpus
         
         Args:
@@ -188,7 +188,7 @@ class Label:
         
         return nmf
         
-    def auto_label_classifier(self, nmf, movies, classifier, m = 1, min_df = 3, max_df = 300):
+    def auto_label_classifier(self, nmf, movies, col_name, classifier, m=1, min_df=3, max_df=300):
         ''' Automatically label unlabeled documents by predicting the labels based on documents that most/least likely belong to a category
         Documents that most/least likely belong to a category were identified based on nmf topic scores
 
@@ -229,14 +229,14 @@ class Label:
             df_val = movies.iloc[test_idx,0:1]
             
             #get train and val dtm 
-            corpus = df_trn['overview']
+            corpus = df_trn[col_name]
             vectorizer = CountVectorizer(ngram_range=(1, 1), min_df =min_df, max_df = max_df)
             vectorizer.fit(corpus)
             tf_dtm = vectorizer.transform(corpus)
             transformer =  TfidfTransformer()
             dtm = transformer.fit_transform(tf_dtm)
 
-            corpus_val = df_val['overview']
+            corpus_val = df_val[col_name]
             tf_dtm_val = vectorizer.transform(corpus_val)
             transformer =  TfidfTransformer()
             dtm_val = transformer.fit_transform(tf_dtm_val)
