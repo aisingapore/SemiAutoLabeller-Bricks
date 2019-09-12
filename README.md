@@ -77,6 +77,20 @@ It is important to identify your desired *keys* and *labels*
 * Notebook takes in `data/labels.csv` to proceed with the semi-supervised labeling
 
 
+### How to use this Model
+The primary function of this model takes in an input (news.csv) and labels it using the labels.csv. It outputs labelled.csv and if ground truth is available, the score.csv.
+* inputs:
+    * news.csv - dataset containing string to be labelled
+        * can contain as many row as needed (recommended less than 10k rows)
+        * contains text to be labelled
+    * labels.csv - labels for different identified classification (e.g. finance, sports, politics)
+        * contains number of columns corresponding to categories
+        * contains keys in each column relating to each category
+* outputs:
+    * labelled.csv - labelled dataset containing labels for the specified input labels from labels.csv. 
+        * Contains the same number of rows as news.csv
+    * score.csv - model performance for the labels. Only available if you have ground truth for the input.
+
 ### Code Tested
 Code tested with python 3.5.5 running on Azure Data Science Virtual Machine (Ubuntu 16.04)
 
