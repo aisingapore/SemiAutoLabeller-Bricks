@@ -154,6 +154,28 @@ class AutoLabeller():
 
         return ypred
 
+def check_labels(corpus, labels):
+    """ removes keywords which are not contained within the corpus
+    
+    Arguments:
+        corpus {DataFrame} -- dataframe of corpus
+        labels {DataFrame} -- dataframe of the labels
+    """
+
+    # convert corpus to a set
+    values = [word for sentences in corpus.values.tolist() for sentence in sentences for word in sentence.split(" ")]
+    corpus_set = set(values)
+    
+    # remove word from labels if not exist in corpus
+    labels = labels.copy(deep=True)
+    for i in range(len(labels.values)):
+        for j in range(len(labels.values[i])):
+            word = labels.values[i][j]
+            if word not in corpus_set and word is not np.nan:
+                labels.values[i][j] = np.nan
+                print("{} is not in the input corpus. It is removed from dictionary".format(word))
+
+    return labels
 
 def recommend_words(corpus, topic_num=[7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18], min_df=3, max_df=300):
     """ recommend words is the method used in the first round of recommendation for a list of words to
