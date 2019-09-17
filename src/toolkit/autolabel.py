@@ -9,6 +9,13 @@ from src.helper.supervised import Supervised
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import precision_score, recall_score, f1_score
+from src.helper.supervised import Supervised
+
+from sklearn.naive_bayes import MultinomialNB
+from sklearn.neural_network import MLPClassifier
+from sklearn.ensemble import GradientBoostingClassifier 
+from sklearn.ensemble import RandomForestClassifier
+
 import numpy as np
 import pandas as pd
 
@@ -122,6 +129,8 @@ class AutoLabeller():
         self._dict2_sel = dict2_sel
         self._dict2_list_idx = dict2_list_idx
 
+        self.enrich = enrich
+
         return enriched_labels
 
     def apply(self, model, col_name, top=10):
@@ -197,32 +206,87 @@ def recommend_words(corpus, topic_num=[7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 
 
     return topic_model, dtm, best_n
 
+class Evaluator():
+    """ Class to evaluate performance of the auto labeller
+    """
+    def __init__(self):
+        return
+        
+    def evaluate_predictions(self, data, ypred, labels, split=0.2, random_state=42):
+        """ evaluates the prediction using precision, recall and f1 score
+        
+        Arguments:
+            data {DataFrame} -- original input dataset
+            ypred {DataFrame} -- predicted results
+            labels {DataFrame} -- dictionary of labels
+        
+        Keyword Arguments:
+            split {float} -- the train test split (default: {0.2})
+            random_state {int} -- numeric seed for random state (default: {42})
+        
+        Returns:
+            DataFrame -- precision, recall and f1 score for the model
+        """
+        indices = np.array(range(data.shape[0]))
+        topics = labels.columns
 
-def evaluate_predictions(data, ypred, labels, split=0.2, random_state=42):
-    indices = np.array(range(data.shape[0]))
-    topics = labels.columns
+        # 20% hold-out for test data
+        train_idx, test_idx = train_test_split(
+            indices, test_size=split, random_state=random_state)
 
-    # 20% hold-out for test data
-    train_idx, test_idx = train_test_split(
-        indices, test_size=0.2, random_state=42)
+        self.train_idx, self.test_idx = train_idx, test_idx
 
-    ypred_test = ypred.iloc[test_idx, :]
-    ytrue = data.iloc[:, 1:]
-    ytrue_test = ytrue.iloc[test_idx, :]
+        ypred_test = ypred.iloc[test_idx, :]
+        ytrue = data.iloc[:, 1:]
+        ytrue_test = ytrue.iloc[test_idx, :]
 
-    auto_yres_test = pd.DataFrame(np.zeros((3, len(topics))),
-                                  index=['Precision', 'Recall', 'F1-score'],
-                                  columns=topics)
+        auto_yres_test = pd.DataFrame(np.zeros((3, len(topics))),
+                                    index=['Precision', 'Recall', 'F1-score'],
+                                    columns=topics)
 
-    for i in range(len(topics)):
-        precision = precision_score(ytrue_test.iloc[:, i],
-                                    ypred_test.iloc[:, i])
-        auto_yres_test.iloc[0, i] = round(precision, 4)
+        for i in range(len(topics)):
+            precision = precision_score(ytrue_test.iloc[:, i],
+                                        ypred_test.iloc[:, i])
+            auto_yres_test.iloc[0, i] = round(precision, 4)
 
-        recall = recall_score(ytrue_test.iloc[:, i], ypred_test.iloc[:, i])
-        auto_yres_test.iloc[1, i] = round(recall, 4)
+            recall = recall_score(ytrue_test.iloc[:, i], ypred_test.iloc[:, i])
+            auto_yres_test.iloc[1, i] = round(recall, 4)
 
-        f1 = f1_score(ytrue_test.iloc[:, i], ypred_test.iloc[:, i])
-        auto_yres_test.iloc[2, i] = round(f1, 4)
+            f1 = f1_score(ytrue_test.iloc[:, i], ypred_test.iloc[:, i])
+            auto_yres_test.iloc[2, i] = round(f1, 4)
 
-    return auto_yres_test
+        return auto_yres_test
+
+    def compare_to_other_models(self, score, data, labels):
+        """ Code to compare performance with other models
+        
+        Arguments:
+            score {DataFrame} -- results of auto labelling tool
+            data {DataFrame} -- original data input
+            labels {DataFrame} -- labelling dictionary
+        
+        Returns:
+            {DataFrame} -- precision, recall and f1 scores of various models
+        """
+            
+        # Supervised Learning document-term matrix using 10% train data for supervised learning
+        supervised = Supervised(self.test_idx, labels.columns)
+        supervised.get_dtm(data, self.train_idx, min_df=3, max_df=300, text_column='content')
+
+        # Multilayer perceptron classifier
+        mlp = MLPClassifier(hidden_layer_sizes=(512,64,), random_state=42)
+        mlp_yres_test = supervised.classifier(mlp)
+
+        # Gradient boosted trees
+        gbm = GradientBoostingClassifier(random_state=42)
+        gbm_yres_test = supervised.classifier(gbm)
+
+        # Random Forest
+        rf = RandomForestClassifier(n_estimators = 500, random_state=42, n_jobs=-1)
+        rf_yres_test = supervised.classifier(rf)
+
+        # combine results into a summary table
+        summary = pd.concat([np.round(score.mean(axis=1),3),np.round(mlp_yres_test.mean(axis=1),3),np.round(gbm_yres_test.mean(axis=1),3),np.round(rf_yres_test.mean(axis=1),3)],axis=1)
+        summary.columns = ['Automatic Labeling','MLP Neural Network', 'Gradient Boosted Trees', 'Random Forest']
+
+        return summary

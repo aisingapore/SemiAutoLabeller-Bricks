@@ -37,7 +37,7 @@ class Supervised:
         self.dtm = None
         self.dtm_val = None
         
-    def get_dtm(self, movies, train_idx0, min_df, max_df):
+    def get_dtm(self, movies, train_idx0, min_df, max_df, text_column='overview'):
         ''' Get tfidf document-term matrix for train and validation set
         
         Args:
@@ -57,7 +57,7 @@ class Supervised:
         self.df_val = movies.iloc[self.test_idx,:]
         genre = movies.columns[1:]
 
-        corpus = self.df_trn['overview']
+        corpus = self.df_trn[text_column]
 
         vectorizer = CountVectorizer(ngram_range=(1, 1), min_df =min_df, max_df = max_df)
         vectorizer.fit(corpus)
@@ -66,7 +66,7 @@ class Supervised:
         transformer =  TfidfTransformer()
         self.dtm = transformer.fit_transform(tf_dtm)
 
-        corpus_val = self.df_val['overview']
+        corpus_val = self.df_val[text_column]
         tf_dtm_val = vectorizer.transform(corpus_val)
         transformer =  TfidfTransformer()
         self.dtm_val = transformer.fit_transform(tf_dtm_val)
@@ -99,4 +99,3 @@ class Supervised:
             yres_test.iloc[2,i] = round(f1_score(ytrue_val.iloc[:,i], ypred_val.iloc[:,i]),4)
 
         return yres_test
-    
