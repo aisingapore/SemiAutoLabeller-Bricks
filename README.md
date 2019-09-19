@@ -28,7 +28,7 @@ You will require the following system set up.
 ### Step-by-step setup
 1. Clone project to the local and cd into project
 ```
-git clone ***
+git clone [repository]
 ```
 2. Create a python virtual environment within project folder
 ```
@@ -116,4 +116,4 @@ Code tested with python 3.5.5 running on Azure Data Science Virtual Machine (Ubu
 ### Dataset sources
 * news - [github](https://github.com/robsalgado/personal_data_science_projects/tree/master/mulitclass_text_class), [medium](https://medium.com/@robert.salgado/multiclass-text-classification-from-start-to-finish-f616a8642538)
 * toxic comments - [kaggle](https://www.kaggle.com/c/jigsaw-toxic-comment-classification-challenge/data)
-*
+* movies - [kaggle](https://www.kaggle.com/rounakbanik/the-movies-dataset/home)
